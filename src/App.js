@@ -1,12 +1,13 @@
 import React from 'react';
 import './App.css';
-import {TextField,Card ,CardContent} from '@material-ui/core/';
-import Axios from 'axios';
+import { TextField, Card, CardContent} from '@material-ui/core/';
 import MainQM from '/home/sheetal/Music/VSCode_Workspace/quantity_measurement/src/component/MainQM.js'
+import { getMainUnits } from '/home/sheetal/Music/VSCode_Workspace/quantity_measurement/src/configuration/configuration.js'
+import { getSubUnits } from '/home/sheetal/Music/VSCode_Workspace/quantity_measurement/src/configuration/configuration.js'
+import { getConvertedValue } from '/home/sheetal/Music/VSCode_Workspace/quantity_measurement/src/configuration/configuration.js'
 
 class App extends React.Component{
-   
-  constructor(props){
+   constructor(props){
     super(props);
     this.state={
         mainUnits:[],
@@ -24,8 +25,7 @@ class App extends React.Component{
     this.onHandleNumbersChange=this.onHandleNumbersChange.bind(this);
 }
 
-componentDidMount()
-{
+componentDidMount(){
     console.log("compoundDidMount Called")
     this.getUnits();
 }
@@ -42,33 +42,33 @@ focus() {
   this.TextField.current.focus();
 }
 
- getUnits=()=>
- {
-  Axios.get('http://localhost:8081/quantityMeasurement/unit/type')
-  .then((response)=>{
-      console.log(response.data.data);
-      this.setState({
-        mainUnits:response.data.data
-      }) 
-      console.log("Message for main unit "+this.state.mainUnits)
-  }).catch((error) => {console.log(error)})
+getUnits=()=>
+{
+    getMainUnits()
+    .then((response)=>{
+                        console.log(response.data.data);
+                        this.setState({
+                                      mainUnits:response.data.data
+                        }) 
+                        console.log("Message for main unit "+this.state.mainUnits)
+    }).catch((error) => {console.log(error)})
 }
       
-  getSubunit = event => 
-  {
-      Axios.get('http://localhost:8081/quantityMeasurement/unit/subtype',{
-      params:{unit: event.target.value}
-     }).then((response)=>{
-      console.log("SubUNit response "+response.data.data);
-      this.setState({
-      subUnits:response.data.data
-      })
-      console.log("Message for sub unit "+this.state.subUnits)
+getSubunit = event => 
+{
+    let unit = event.target.value
+    getSubUnits(unit)
+    .then((response)=>{
+                        console.log("SubUnit response "+response.data.data);
+                        this.setState({
+                                      subUnits:response.data.data
+                        })
+                        console.log("Message for sub unit "+this.state.subUnits)
     }).catch((error)=>{console.log(error)})  
-  }
+}
 
-  getForwardResult = event => 
-  {
+getForwardResult = event => 
+{
     this.setState({actualValue: event.target.value});
 
     const body1 = {
@@ -77,46 +77,53 @@ focus() {
       actualValue  : event.target.value
     }
     
-    Axios.post("http://localhost:8081/quantityMeasurement/unit/conversion",body1)
+    getConvertedValue(body1)
     .then((response) => {
-        console.log(response.data)
-        this.setState({outputValue:response.data.data})
+                        console.log(response.data)
+                        this.setState({
+                                      outputValue:response.data.data
+                        })
     }).catch((error) => {console.log(error)})
-   }
+}
 
-   getReverseResult = event => 
-   {
-      this.setState({outputValue : event.target.value});
-
-      const body2 = {
+getReverseResult = event => 
+{
+    this.setState({outputValue : event.target.value});
+    
+    const body2 = {
         initialUnit : this.state.outputUnit,
         outputUnit  : this.state.initialUnit,
         actualValue : this.state.outputValue
-      }
+    }
     
-      Axios.post("http://localhost:8081/quantityMeasurement/unit/conversion",body2)
-      .then((response) => {
-        console.log(response.data)
-        this.setState({actualValue:response.data.data})
-      }).catch((error) => {console.log(error)})
-  }
+    getConvertedValue(body2)
+    .then((response) => {
+                        console.log(response.data)
+                        this.setState({
+                                      actualValue:response.data.data
+                        })
+    }).catch((error) => {console.log(error)})
+}
 
-  onHandleNumbersChange = e => {
+onHandleNumbersChange = e => 
+{
     let actualValue = e.target.value;
     let outputValue  = e.target.value;
-    if (actualValue === '' || this.state.regexp.test(actualValue)) {
+    if (actualValue === '' || this.state.regexp.test(actualValue)) 
+    {
         this.setState({ [e.target.name]:actualValue})
     }
-    if (outputValue === '' || this.state.regexp.test(outputValue)) {
+    if (outputValue === '' || this.state.regexp.test(outputValue)) 
+    {
       this.setState({ [e.target.name]:outputValue})
-  }
+    }
 };
 
   
 render()
 {
-     console.log("inside App Render  "+ this.state.mainUnits)
-     return (
+    console.log("inside App Render  "+ this.state.mainUnits)
+    return (
        <div  className="MainQM">
        <div>
        <Card className="card" variant="outlined">

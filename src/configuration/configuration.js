@@ -1,29 +1,26 @@
 const axios = require('axios').default;
-// import axios from 'axios';
 
- export function config(obj) {
+export function getMainUnits() 
+{
+    return axios.get('http://localhost:8081/quantityMeasurement/unit/type')
+}
 
-    console.log("obj to print--->", obj)
-        return axios({
-            method: 'post',
-            url: 'http://localhost:8081/quantityMeasurement/unit/conversion',
-            data: obj
-        })
-    }
+export function getSubUnits(mainUnit) 
+{
+    console.log("obj--> ",mainUnit);
+    return axios({
+        method:'get',
+        url:'http://localhost:8081/quantityMeasurement/unit/subtype',
+        params :{ unit:mainUnit}
+    })
+}
 
-  export function getUnits() {
-        return axios.get('http://localhost:8081/quantityMeasurement/unit/type')
-    }
-
-  export function getUnitType(obj) {
-      console.log("obj--> ",obj);
-      
-        return axios({
-           method:'post',
-            url:'http://localhost:8081/quantityMeasurement/unit/subtype?unit=LENGTH',
-            data : {
-                type:obj
-            }
-        })
-        
-    }
+export function getConvertedValue(input) 
+{
+    console.log("obj--> ",input);
+    return axios({
+        method:'post',
+        url:'http://localhost:8081/quantityMeasurement/unit/conversion',
+        data : input
+    })
+}
